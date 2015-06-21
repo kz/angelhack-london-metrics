@@ -11,4 +11,4 @@
 |
 */
 
-Route::get('/', 'IdolController@analyseKeyword');
+Route::get('/analyse', 'IdolController@analyseKeyword');
