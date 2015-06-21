@@ -4,8 +4,10 @@ namespace Metrics\Idol;
 
 use Carbon\Carbon;
 use GuzzleHttp;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 
 class Idol {
 
@@ -56,8 +58,10 @@ class Idol {
                     'min_date' => $min_date,
                     'max_date' => $max_date,
                     'indexes' => $indexes,
+                    'print' => 'all',
                     'apikey' => $this->api_key,
-                    'max_results' => $max_results
+                    'max_results' => $max_results,
+                    'min_score' => '50'
                 ]
             ], ['verify' => false]);
         } catch (\Exception $e) {
@@ -100,31 +104,50 @@ class Idol {
             throw new \Exception('No news articles have been found.', 404);
         }
 
+        $aggregate_score = 0;
+        $news_analytics = [];
 
+        $promises = [];
         foreach ($documents as $key => $document) {
-            $promises[] = $client->postAsync('https://api.idolondemand.com/1/api/sync/analyzesentiment/v1', [
-                'form_params' => [
-                    'url' => $document['reference'],
-                    'apikey' => $this->api_key
-                ]
-            ], ['verify' => 'false']);
+            $promises[] = $client
+                ->postAsync(
+                    'https://api.idolondemand.com/1/api/sync/analyzesentiment/v1',
+                    [
+                        'form_params' => [
+                            'text' => $document['content'],
+                            'apikey' => $this->api_key
+                        ]
+                    ],
+                    ['verify' => 'false']
+                )
+                ->then(
+                    function(ResponseInterface $res) use($document, &$aggregate_score, &$news_analytics)
+                    {
+                        $result = json_decode((string) $res->getBody(), true);
+
+                        $score = (int) ($result['aggregate']['score'] * 100);
+                        $aggregate_score =+ $score;
+
+                        $news_analytics[] = [
+                            'title' => $document['title'],
+                            'url' => $document['reference'],
+                            'sentiment' => $result['aggregate']['sentiment'],
+                            'score' => $score
+                        ];
+                    },
+                    function(RequestException $e) {
+                    // Ignore?
+                    }
+                )
+            ;
+        }
+
+        if (!count($promises)) {
+            return [];
         }
 
         $results = Promise\unwrap($promises);
 
-        $aggregate_score = 0;
-        foreach($results as $key => $result) {
-            $document = $documents[$key];
-            $result = json_decode((string) $result->getBody(), true);
-            $score = (int) ($result['aggregate']['score'] * 100);
-            $aggregate_score =+ $score;
-            $news_analytics[] = [
-                'title' => $document['title'],
-                'url' => $document['reference'],
-                'sentiment' => $result['aggregate']['sentiment'],
-                'score' => $score
-            ];
-        }
         $aggregate_score = (int) ($aggregate_score / count($results));
 
         if (!$results) {
