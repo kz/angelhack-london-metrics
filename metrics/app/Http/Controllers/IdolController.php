@@ -29,7 +29,7 @@ class IdolController extends Controller
                 $max_date = (Input::has('max_date')) ? Input::get('max_date') . 'e' : null;
                 $response = $idol->queryTextIndexByKeyword($keyword, $min_date, $max_date, $max_results);
             } else {
-                $response = $idol->queryTwitterWithKeyword($keyword, $max_results);
+                $response = $idol->queryTextIndexWithTicker($keyword, $max_results);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
