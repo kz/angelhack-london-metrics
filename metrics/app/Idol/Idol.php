@@ -30,6 +30,24 @@ class Idol {
         $this->api_key = $this->config['api_key'];
     }
 
+    public function queryTextIndexWithTicker($keyword, $max_results = 35, $indexes = 'news_eng'){
+        $carbon = Carbon::now();
+        $today = $carbon->timestamp . 'e';
+        $yesterday = $carbon->subDay()->timestamp . 'e';
+        $day_before_yesterday = $carbon->subDay(2)->timestamp . 'e';
+        $today_news =  $this->queryTextIndexByKeyword($keyword, $yesterday, $today, $max_results, $indexes);
+        $yesterday_news =  $this->queryTextIndexByKeyword($keyword, $day_before_yesterday, $yesterday, $max_results, $indexes);
+        $today_score = $today_news['aggregate']['score'];
+        $yesterday_score = $yesterday_news['aggregate']['score'];
+        return [
+            'aggregate' => [
+                'score_change' => $yesterday_score - $today_score
+            ],
+            'today' => $today_news,
+            'yesterday' => $yesterday_news
+        ];
+    }
+
     public function queryTextIndexByKeyword($keyword, $min_date = null, $max_date = null, $max_results = 35, $indexes = 'news_eng') {
         $response = $this->client->post('https://api.idolondemand.com/1/api/sync/querytextindex/v1', [
             'form_params' => [
@@ -67,6 +85,7 @@ class Idol {
         $client = $this->client;
 
         if (!$documents) {
+            // TODO
             return response()->json(['message' => 'No URLs received.'], 400);
         }
 
@@ -94,15 +113,15 @@ class Idol {
                 'score' => $score
             ];
         }
-        $aggregate_score = (int) ($aggregate_score / count($results) * 100);
+        $aggregate_score = (int) ($aggregate_score / count($results));
 
-        return response()->json([
+        return [
             'aggregate' => [
                 'score' => $aggregate_score,
                 'sentiment' => ($aggregate_score >= 0) ? 'positive' : 'negative',
             ],
             'news_analytics' => $news_analytics
-        ], 200);
+        ];
     }
 
 }

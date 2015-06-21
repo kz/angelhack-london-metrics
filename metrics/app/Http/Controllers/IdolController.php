@@ -25,9 +25,9 @@ class IdolController extends Controller
         $max_results = (Input::has('max_results')) ? Input::get('max_results') : 20;
         $idol = $this->idol;
         $response = $idol->queryTextIndexByKeyword($keyword, $min_date, $max_date, $max_results);
+        $response = $idol->queryTextIndexWithTicker($keyword,$max_results);
 
-
-        return $response;
+        return response()->json($response, 200);;
     }
 
 }
