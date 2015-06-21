@@ -1,0 +1,19 @@
+{
+  "name": "Metrics",
+  "version": "0.0.1",
+  "authors": [
+    "Adam Lavin <adam@lavoaster.co.uk>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "angular": "~1.4.0",
+    "angular-animate": "~1.4.0",
+    "angular-aria": "~1.4.0",
+    "angular-loader": "~1.4.0",
+    "ui-router": "~0.2.15",
+    "font-awesome": "~4.3.0",
+    "angular-translate": "~2.7.2",
+    "angular-sanitize": "~1.4.0"
+  }
+}
