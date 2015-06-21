@@ -22,13 +22,21 @@ class IdolController extends Controller
         $keyword = Input::get('keyword');
         $max_results = (Input::has('max_results')) ? Input::get('max_results') : 20;
         $idol = $this->idol;
-        if (Input::has('min_date') || Input::has('max_date')) {
-            $min_date = (Input::has('min_date')) ? Input::get('min_date') . 'e' : null;
-            $max_date = (Input::has('max_date')) ? Input::get('max_date') . 'e' : null;
-            $response = $idol->queryTextIndexByKeyword($keyword, $min_date, $max_date, $max_results);
-        } else {
-            $response = $idol->queryTextIndexWithTicker($keyword, $max_results);
+
+        try {
+            if (Input::has('min_date') || Input::has('max_date')) {
+                $min_date = (Input::has('min_date')) ? Input::get('min_date') . 'e' : null;
+                $max_date = (Input::has('max_date')) ? Input::get('max_date') . 'e' : null;
+                $response = $idol->queryTextIndexByKeyword($keyword, $min_date, $max_date, $max_results);
+            } else {
+                $response = $idol->queryTextIndexWithTicker($keyword, $max_results);
+            }
+        } catch (\Exception $e) {
+            if ($e->getCode() == 404 || $e->getCode() == 500) {
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
+            }
         }
+
         return response()->json($response, 200);
     }
 

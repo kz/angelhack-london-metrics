@@ -49,21 +49,25 @@ class Idol {
     }
 
     public function queryTextIndexByKeyword($keyword, $min_date = null, $max_date = null, $max_results = 35, $indexes = 'news_eng') {
-        $response = $this->client->post('https://api.idolondemand.com/1/api/sync/querytextindex/v1', [
-            'form_params' => [
-                'text' => $keyword,
-                'min_date' => $min_date,
-                'max_date' => $max_date,
-                'indexes' => $indexes,
-                'apikey' => $this->api_key,
-                'max_results' => $max_results
-            ]
-        ], ['verify' => false]);
+        try {
+            $response = $this->client->post('https://api.idolondemand.com/1/api/sync/querytextindex/v1', [
+                'form_params' => [
+                    'text' => $keyword,
+                    'min_date' => $min_date,
+                    'max_date' => $max_date,
+                    'indexes' => $indexes,
+                    'apikey' => $this->api_key,
+                    'max_results' => $max_results
+                ]
+            ], ['verify' => false]);
+        } catch (Exception $e) {
+            throw new Exception('An error occurred while trying to access IDOL OnDemand.', 500);
+        }
 
         $json = json_decode((string) $response->getBody(), true);
 
         if (!$json && !array_key_exists('documents', $json)) {
-            return response()->json(['message' => 'No documents found.'], 404);
+            throw new \Exception('No news articles have been found.', 404);
         }
 
         $documents = $json['documents'];
@@ -78,16 +82,24 @@ class Idol {
         }
         $documents = array_values($documents);
 
-        return $this->analyseSentiments($documents);
+        if (!$documents) {
+            throw new Exception('No news articles have been found.', 404);
+        }
+
+        try {
+            return $this->analyseSentiments($documents);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     public function analyseSentiments($documents){
         $client = $this->client;
 
         if (!$documents) {
-            // TODO
-            return response()->json(['message' => 'No URLs received.'], 400);
+            throw new Exception('No news articles have been found.', 404);
         }
+
 
         foreach ($documents as $key => $document) {
             $promises[] = $client->postAsync('https://api.idolondemand.com/1/api/sync/analyzesentiment/v1', [
@@ -114,6 +126,10 @@ class Idol {
             ];
         }
         $aggregate_score = (int) ($aggregate_score / count($results));
+
+        if (!$results) {
+            throw new \Exception('No sentiment results could be found.', 404);
+        }
 
         return [
             'aggregate' => [
