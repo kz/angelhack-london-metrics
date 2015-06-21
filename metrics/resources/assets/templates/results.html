@@ -3,8 +3,27 @@
     <div id="home-text-wrapper"
          style="margin-top: 20px; padding: 15px 0px; background-color: rgba(0, 0, 0, 0.498039);">
 
-        <div id="home-text">
+        <div class="loader home-text" ng-if="vm.loading">
+            <h1>Lovingly Crunching Your Data...</h1>
+            <div class="loader-inner ball-grid-pulse" style="margin: 0 auto">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <div id="home-text" ng-if="!vm.loading">
             <h1>{{ vm.companyName }}</h1>
+
+            <p>Today your overall sentiment is: {{ vm.companyData.today.aggregate.sentiment }}</p>
+            <p>Yesterday your overall sentiment was: {{ vm.companyData.yesterday.aggregate.sentiment }}</p>
 
 
         </div>

@@ -8,7 +8,7 @@
     function Results($http) {
         return {
             queryCompany: queryCompany
-        }
+        };
 
         ////////////////
 
