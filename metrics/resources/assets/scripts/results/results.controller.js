@@ -30,7 +30,7 @@
                 }
 
                 if (vm.companyData.aggregate.score_change < 0 ) {
-                    vm.iconClass = 'glyphicon glyphicon-triangle-bottom text-error';
+                    vm.iconClass = 'glyphicon glyphicon-triangle-bottom text-danger';
                 }
 
                 console.log(vm.companyData);
