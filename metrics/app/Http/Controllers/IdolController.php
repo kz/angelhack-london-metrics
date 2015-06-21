@@ -32,7 +32,7 @@ class IdolController extends Controller
                 $response = $idol->queryTextIndexWithTicker($keyword, $max_results);
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500O);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
 
         return response()->json($response, 200);
