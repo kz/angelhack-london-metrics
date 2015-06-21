@@ -41,7 +41,7 @@ class Idol {
         $yesterday_score = $yesterday_news['aggregate']['score'];
         return [
             'aggregate' => [
-                'score_change' => $yesterday_score - $today_score
+                'score_change' => $today_score - $yesterday_score
             ],
             'today' => $today_news,
             'yesterday' => $yesterday_news
@@ -60,8 +60,8 @@ class Idol {
                     'max_results' => $max_results
                 ]
             ], ['verify' => false]);
-        } catch (Exception $e) {
-            throw new Exception('An error occurred while trying to access IDOL OnDemand.', 500);
+        } catch (\Exception $e) {
+            throw new \Exception('An error occurred while trying to access IDOL OnDemand.', 500);
         }
 
         $json = json_decode((string) $response->getBody(), true);
@@ -83,12 +83,12 @@ class Idol {
         $documents = array_values($documents);
 
         if (!$documents) {
-            throw new Exception('No news articles have been found.', 404);
+            throw new \Exception('No news articles have been found.', 404);
         }
 
         try {
             return $this->analyseSentiments($documents);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw $e;
         }
     }
@@ -97,17 +97,17 @@ class Idol {
         $client = $this->client;
 
         if (!$documents) {
-            throw new Exception('No news articles have been found.', 404);
+            throw new \Exception('No news articles have been found.', 404);
         }
 
 
         foreach ($documents as $key => $document) {
             $promises[] = $client->postAsync('https://api.idolondemand.com/1/api/sync/analyzesentiment/v1', [
-                    'form_params' => [
-                        'url' => $document['reference'],
-                        'apikey' => $this->api_key
-                    ]
-                ], ['verify' => 'false']);
+                'form_params' => [
+                    'url' => $document['reference'],
+                    'apikey' => $this->api_key
+                ]
+            ], ['verify' => 'false']);
         }
 
         $results = Promise\unwrap($promises);
