@@ -2,6 +2,13 @@
 @import "globals/custom";
 @import "globals/default";
 
+html,body {
+  background-image: url(/resources/images/bg.jpg);
+  background-attachment: fixed;
+  -webkit-background-size: cover;
+  background-size: cover;
+}
+
 // Components
 
 // Sections

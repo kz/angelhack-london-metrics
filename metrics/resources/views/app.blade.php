@@ -41,10 +41,9 @@
     <body id="body" style="display: block; font-family: Nobile, Molengo, 'Josefin Sans', Arial, Cardo;">
 
         <div class="site-wrapper" id="home" style="box-shadow: rgba(0, 0, 0, 0.760784) 0px 0px 130px inset;">
-            <div class="before" style="background-image: url(/resources/images/bg.jpg);"></div>
             <div class="navbar masthead clearfix top" id="navigation" style="background: rgba(42, 62, 132, 0);">
                 <div class="inner">
-                    <a href="#home" style="color: rgb(255, 255, 255);">
+                    <a href="/" style="color: rgb(255, 255, 255);">
                         <h3 class="masthead-brand" id="logo"
                             style="text-transform: capitalize; letter-spacing: -1.1px; font-size: 1.9em; font-family: 'Source Sans Pro', Lato, Corben, Allerta, 'Kaushan Script';">
                             <i class="glyphicon glyphicon-cloud-upload"></i> Metrics</h3>

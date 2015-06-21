@@ -20,12 +20,37 @@
         </div>
 
         <div id="home-text" ng-if="!vm.loading">
-            <h1>{{ vm.companyName }}</h1>
+            <h1>{{ vm.companyName }} <i class="glyphicon" ng-class="vm.iconClass"></i> {{vm.companyData.aggregate.score_change}} </h1>
 
-            <p>Today your overall sentiment is: {{ vm.companyData.today.aggregate.sentiment }}</p>
-            <p>Yesterday your overall sentiment was: {{ vm.companyData.yesterday.aggregate.sentiment }}</p>
+            <p>Overall sentiment score today is <b>{{ vm.companyData.today.aggregate.score }}</b> compared to <b>{{ vm.companyData.yesterday.aggregate.score }}</b> yesterday.</p>
 
+            <div class="col-xs-6">
+                <h2>Today's Newsfeed</h2>
 
+                <hr>
+
+                <div ng-repeat="newssite in vm.companyData.yesterday.news_analytics" style="float:left; width: 100%; text-align: left">
+                    <a ng-href="newssite.url">{{ newssite.title }}</a>
+                    <br />
+                    <span style="display: block; text-align: left">Sentiment: {{ newssite.sentiment }} Score: {{ newssite.score }}</span>
+                    <hr>
+                </div>
+            </div>
+
+            <div class="col-xs-6">
+                <h2>Yesterday's Newsfeed</h2>
+
+                <hr>
+
+                <div ng-repeat="newssite in vm.companyData.yesterday.news_analytics" style="float:left; width: 100%; text-align: left">
+                    <a ng-href="newssite.url">{{ newssite.title }}</a>
+                    <br />
+                    <span style="display: block; text-align: left">Sentiment: {{ newssite.sentiment }} Score: {{ newssite.score }}</span>
+                    <hr>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
         </div>
     </div>
 </div>

@@ -14,6 +14,8 @@
         vm.back = back;
         vm.companyData = null;
 
+        vm.iconClass = 'glyphicon glyphicon-minus';
+
         init();
 
         ///////////////
@@ -22,6 +24,14 @@
             Results.queryCompany(vm.companyName).then(res => {
                 vm.loading = false;
                 vm.companyData = res.data;
+
+                if (vm.companyData.aggregate.score_change > 0 ) {
+                    vm.iconClass = 'glyphicon glyphicon-triangle-top text-success';
+                }
+
+                if (vm.companyData.aggregate.score_change < 0 ) {
+                    vm.iconClass = 'glyphicon glyphicon-triangle-bottom text-error';
+                }
 
                 console.log(vm.companyData);
             });
