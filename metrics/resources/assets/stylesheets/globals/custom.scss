@@ -116,8 +116,8 @@ body {
   position: relative;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 1%;
+  height: 100vh;
   display: table-cell;
   vertical-align: middle;
 }
@@ -202,9 +202,6 @@ body {
   line-height: 0.85em;
   font-family: 'Gotham', 'Source Sans Pro', 'Arial Black', Avenir, Roboto;
   font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -3px;
-  margin-bottom: 0.2em;
 }
 
 #opener {

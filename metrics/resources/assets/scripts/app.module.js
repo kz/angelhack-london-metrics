@@ -5,6 +5,7 @@
         .module('app', [
             'app.core',
             'app.home',
+            'app.results',
 
             'ngAnimate',
             'ngSanitize',
