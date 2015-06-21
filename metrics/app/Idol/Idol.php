@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
+use Thujohn\Twitter\Facades\Twitter;
 
 class Idol {
 
@@ -30,6 +31,25 @@ class Idol {
         $this->client = $client;
         $this->config = $config;
         $this->api_key = $this->config['api_key'];
+    }
+
+    public function queryTwitterWithKeyword($keyword, $count = 30){
+        $twitter = Twitter::getSearch([
+            'q' => $keyword,
+            'result_type' => 'recent',
+            'lang' => 'en',
+            'count' => $count
+        ]);
+        $statuses = $twitter->statuses;
+        $documents = [];
+        foreach ($statuses as $status) {
+            $documents[] = [
+                'content' => $status->text,
+                'title' => $status->id,
+                'reference' => $status->id
+            ];
+        }
+        return $this->analyseSentiments($documents);
     }
 
     public function queryTextIndexWithTicker($keyword, $max_results = 35, $indexes = 'news_eng'){
@@ -126,7 +146,7 @@ class Idol {
                         $result = json_decode((string) $res->getBody(), true);
 
                         $score = (int) ($result['aggregate']['score'] * 100);
-                        $aggregate_score =+ $score;
+                        $aggregate_score += $score;
 
                         $news_analytics[] = [
                             'title' => $document['title'],
@@ -136,7 +156,7 @@ class Idol {
                         ];
                     },
                     function(RequestException $e) {
-                    // Ignore?
+                        // Ignore?
                     }
                 )
             ;

@@ -12,5 +12,4 @@
 */
 
 Route::get('/api/analyse', 'IdolController@analyseKeyword');
-
 Route::get('{any}', 'AppController@index')->where('any', '.*');
