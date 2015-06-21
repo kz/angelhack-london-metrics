@@ -20,14 +20,17 @@ class IdolController extends Controller
 
     public function analyseKeyword(){
         $keyword = Input::get('keyword');
-        $min_date = (Input::has('min_date')) ? Input::get('min_date') . 'e' : null;
-        $max_date = (Input::has('max_date')) ? Input::get('max_date') . 'e' : null;
         $max_results = (Input::has('max_results')) ? Input::get('max_results') : 20;
         $idol = $this->idol;
-        $response = $idol->queryTextIndexByKeyword($keyword, $min_date, $max_date, $max_results);
-        $response = $idol->queryTextIndexWithTicker($keyword,$max_results);
-
-        return response()->json($response, 200);;
+        if (Input::has('min_date') || Input::has('max_date')) {
+            $min_date = (Input::has('min_date')) ? Input::get('min_date') . 'e' : null;
+            $max_date = (Input::has('max_date')) ? Input::get('max_date') . 'e' : null;
+            $response = $idol->queryTextIndexByKeyword($keyword, $min_date, $max_date, $max_results);
+        } else {
+            $response = $idol->queryTextIndexWithTicker($keyword, $max_results);
+        }
+        return response()->json($response, 200);
     }
+
 
 }

@@ -11,4 +11,9 @@
 |
 */
 
-Route::get('/analyse', 'IdolController@analyseKeyword');
+Route::get('/', function()
+{
+    return View::make('master');
+});
+
+Route::get('/api/analyse', 'IdolController@analyseKeyword');
