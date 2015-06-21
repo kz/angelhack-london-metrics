@@ -30,7 +30,7 @@ class Idol {
         $this->api_key = $this->config['api_key'];
     }
 
-    public function queryTextIndexByKeyword($keyword, $min_date = null, $max_date = null, $max_results = 20, $indexes = 'news_eng') {
+    public function queryTextIndexByKeyword($keyword, $min_date = null, $max_date = null, $max_results = 35, $indexes = 'news_eng') {
         $response = $this->client->post('https://api.idolondemand.com/1/api/sync/querytextindex/v1', [
             'form_params' => [
                 'text' => $keyword,
@@ -49,8 +49,18 @@ class Idol {
         }
 
         $documents = $json['documents'];
-        // TODO - Resolve title duplicates
-        $this->analyseSentiments($documents);
+
+        $deduplicate = [];
+        foreach ($documents as $key => &$document) {
+            $title = $document['title'];
+            if (in_array($title, $deduplicate)) {
+                unset($documents[$key]);
+            }
+            $deduplicate[$key] = $title;
+        }
+        $documents = array_values($documents);
+
+        return $this->analyseSentiments($documents);
     }
 
     public function analyseSentiments($documents){
@@ -60,21 +70,39 @@ class Idol {
             return response()->json(['message' => 'No URLs received.'], 400);
         }
 
-        $results = [];
-
-        foreach ($documents as $document) {
-            $request = $client->post('https://api.idolondemand.com/1/api/sync/analyzesentiment/v1', [
+        foreach ($documents as $key => $document) {
+            $promises[] = $client->postAsync('https://api.idolondemand.com/1/api/sync/analyzesentiment/v1', [
                     'form_params' => [
-                    'url' => $document['reference'],
-                    'apikey' => $this->api_key
-                ]
-            ], ['verify' => 'false']);
-            $response = json_decode((string) $request->getBody(), true);
-            $score = (int) ($response['aggregate']['score'] * 100);
-            $results[] = ['title' => $document['title'], 'url' => $document['reference'], 'sentiment' => $response['aggregate']['sentiment'], 'score' => $score];
+                        'url' => $document['reference'],
+                        'apikey' => $this->api_key
+                    ]
+                ], ['verify' => 'false']);
         }
-//        dd($results);
-        return response()->json(['results' => $results], 200);
+
+        $results = Promise\unwrap($promises);
+
+        $aggregate_score = 0;
+        foreach($results as $key => $result) {
+            $document = $documents[$key];
+            $result = json_decode((string) $result->getBody(), true);
+            $score = (int) ($result['aggregate']['score'] * 100);
+            $aggregate_score =+ $score;
+            $news_analytics[] = [
+                'title' => $document['title'],
+                'url' => $document['reference'],
+                'sentiment' => $result['aggregate']['sentiment'],
+                'score' => $score
+            ];
+        }
+        $aggregate_score = (int) ($aggregate_score / count($results) * 100);
+
+        return response()->json([
+            'aggregate' => [
+                'score' => $aggregate_score,
+                'sentiment' => ($aggregate_score >= 0) ? 'positive' : 'negative',
+            ],
+            'news_analytics' => $news_analytics
+        ], 200);
     }
 
 }
